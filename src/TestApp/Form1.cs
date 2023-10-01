@@ -259,11 +259,7 @@ namespace TestApp
                 sw.Start();
 
                 using IExcelDataReader reader = ExcelReaderFactory.CreateReader(stream);
-                reader.Read();
-                reader.GetValue(1);
-                var temp = reader.GetName(0);
-                var temp1 = reader.GetName(10);
-                reader.GetCellStyle(2);
+
                 var openTiming = sw.ElapsedMilliseconds;
                 // reader.IsFirstRowAsColumnNames = firstRowNamesCheckBox.Checked;
                 ds = reader.AsDataSet(new ExcelDataSetConfiguration()
