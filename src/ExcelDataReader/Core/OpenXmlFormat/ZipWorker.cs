@@ -147,6 +147,9 @@ namespace ExcelDataReader.Core.OpenXmlFormat
             return null;
         }
 
+
+
+
         /// <summary>
         /// Gets the styles reader.
         /// </summary>
@@ -163,6 +166,21 @@ namespace ExcelDataReader.Core.OpenXmlFormat
 
             return null;
         }
+
+        public RecordReader? GetNamedRangeReader()
+        {
+            if (FindEntry(_fileWorkbook) is { } entry)
+            {
+                if (entry.FullName.EndsWith(".xml", StringComparison.Ordinal))
+                    return new XmlNamedRangeReader(XmlReader.Create(entry.Open(), XmlSettings));
+
+                if (entry.FullName.EndsWith(".bin", StringComparison.Ordinal))
+                    return new BiffNamedRangeReader(entry.Open());
+            }
+
+            return null;
+        }
+
 
         /// <summary>
         /// Gets the workbook reader.

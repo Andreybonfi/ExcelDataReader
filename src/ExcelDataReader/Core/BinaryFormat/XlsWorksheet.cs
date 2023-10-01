@@ -49,6 +49,8 @@ namespace ExcelDataReader.Core.BinaryFormat
 
         public CellRange[] MergeCells { get; private set; }
 
+        public NamedRange[] NamedRanges => null;
+
         public Column[] ColumnWidths { get; private set; }
 
         /// <summary>

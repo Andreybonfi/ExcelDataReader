@@ -28,5 +28,20 @@ namespace ExcelDataReader.Core
             xmlReader.Skip();
             return true;
         }
+
+        public static bool IsEndElement(XmlReader xmlReader, string localname, string ns)
+        {
+            if (xmlReader.MoveToContent() == XmlNodeType.EndElement)
+            {
+                if (xmlReader.LocalName == localname)
+                {
+                    return xmlReader.NamespaceURI == ns;
+                }
+
+                return false;
+            }
+
+            return false;
+        }
     }
 }

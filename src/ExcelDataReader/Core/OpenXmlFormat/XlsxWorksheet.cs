@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using ExcelDataReader.Core.NumberFormat;
 using ExcelDataReader.Core.OpenXmlFormat.Records;
@@ -8,7 +9,7 @@ namespace ExcelDataReader.Core.OpenXmlFormat
 {
     internal sealed class XlsxWorksheet : IWorksheet
     {
-        public XlsxWorksheet(ZipWorker document, XlsxWorkbook workbook, SheetRecord refSheet)
+        public XlsxWorksheet(ZipWorker document, XlsxWorkbook workbook, SheetRecord refSheet, NamedRangeRecord[] namedRange)
         {
             Document = document;
             Workbook = workbook;
@@ -19,7 +20,7 @@ namespace ExcelDataReader.Core.OpenXmlFormat
             VisibleState = refSheet.VisibleState;
             Path = refSheet.Path;
             DefaultRowHeight = 15;
-
+            
             if (string.IsNullOrEmpty(Path))
                 return;
 
@@ -33,6 +34,9 @@ namespace ExcelDataReader.Core.OpenXmlFormat
 
             List<Column> columnWidths = new();
             List<CellRange> cellRanges = new();
+            List<NamedRange> namedRanges = new();
+
+
 
             bool inSheetData = false;
 
@@ -73,8 +77,19 @@ namespace ExcelDataReader.Core.OpenXmlFormat
                 }
             }
 
+            foreach (Record namedrecord in namedRange)
+            {
+                switch (namedrecord)
+                {
+                    case NamedRangeRecord namedRangeRecord:
+                        namedRanges.Add(namedRangeRecord.Range);
+                        break;
+                }
+            }
+
             ColumnWidths = columnWidths.ToArray();
             MergeCells = cellRanges.ToArray();
+            NamedRanges = namedRanges.ToArray();
 
             if (rowIndexMaximum != int.MinValue && columnIndexMaximum != int.MinValue)
             {
@@ -104,6 +119,8 @@ namespace ExcelDataReader.Core.OpenXmlFormat
         public string Path { get; set; }
 
         public CellRange[] MergeCells { get; }
+
+        public NamedRange[] NamedRanges { get; }
 
         public Column[] ColumnWidths { get; }
 

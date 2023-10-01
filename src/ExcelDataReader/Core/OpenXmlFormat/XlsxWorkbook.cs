@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-
+using System.Linq;
 using ExcelDataReader.Core.OpenXmlFormat.Records;
 
 namespace ExcelDataReader.Core.OpenXmlFormat
@@ -14,9 +14,12 @@ namespace ExcelDataReader.Core.OpenXmlFormat
             ReadWorkbook();
             ReadSharedStrings();
             ReadStyles();
+            ReadNamedRange();
         }
 
         public List<SheetRecord> Sheets { get; } = new List<SheetRecord>();
+
+        public List<NamedRangeRecord> NamedRanges { get; } = new List<NamedRangeRecord>();
 
         public XlsxSST SST { get; } = new XlsxSST();
 
@@ -28,7 +31,7 @@ namespace ExcelDataReader.Core.OpenXmlFormat
         {
             foreach (var sheet in Sheets)
             {
-                yield return new XlsxWorksheet(_zipWorker, this, sheet);
+                yield return new XlsxWorksheet(_zipWorker, this, sheet, NamedRanges.Where(x => x.Range.SheetName == sheet.Name || x.Range.Global).ToArray());
             }
         }
 
@@ -68,6 +71,26 @@ namespace ExcelDataReader.Core.OpenXmlFormat
                 }
             }
         }
+
+        private void ReadNamedRange()
+        {
+            using var reader = _zipWorker.GetNamedRangeReader();
+            if (reader == null)
+                return;
+
+            Record record;
+            while ((record = reader.Read()) != null)
+            {
+                switch (record)
+                {
+                    case NamedRangeRecord namedRangeRecord:
+                        NamedRanges.Add(namedRangeRecord);
+                        break;
+                }
+            }
+        }
+
+
 
         private void ReadStyles()
         {

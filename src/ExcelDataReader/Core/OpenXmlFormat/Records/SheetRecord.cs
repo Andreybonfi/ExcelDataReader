@@ -24,5 +24,7 @@ namespace ExcelDataReader.Core.OpenXmlFormat.Records
         public string? Rid { get; }
 
         public string? Path { get; }
+
+        
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using ExcelDataReader.Core;
 
 namespace ExcelDataReader
@@ -34,6 +35,8 @@ namespace ExcelDataReader
 
         // We shouldn't expose the internal array here. 
         public CellRange[] MergeCells => _worksheetIterator?.Current?.MergeCells;
+
+        protected NamedRange[] NamedRanges => _worksheetIterator?.Current?.NamedRanges;
 
         public int Depth { get; private set; }
 
@@ -71,7 +74,7 @@ namespace ExcelDataReader
 
         public IDataReader GetData(int i) => throw new NotSupportedException();
 
-        public string GetDataTypeName(int i) => throw new NotSupportedException();
+        public string GetDataTypeName(int i) => GetValue(i).GetType().Name;
 
         public DateTime GetDateTime(int i) => (DateTime)GetValue(i);
 
@@ -91,9 +94,43 @@ namespace ExcelDataReader
 
         public long GetInt64(int i) => (long)GetValue(i);
 
-        public string GetName(int i) => throw new NotSupportedException();
+        public string GetName(int i) 
+        {
+            if (RowCells == null)
+                throw new InvalidOperationException("No data exists for the row/column.");
+            
+            var rowIndex = _rowIterator.Current.RowIndex;
 
-        public int GetOrdinal(string name) => throw new NotSupportedException();
+            var namedRanges = NamedRanges
+                .Where(x =>
+                    (x.FromRow == rowIndex && x.FromColumn == i && x.ToRow == null)
+                    ||
+                    (rowIndex >= x.FromRow && rowIndex <= x.ToColumn && i >= x.FromColumn && i <= x.ToColumn))
+                     .OrderBy(x => x.Global);
+
+            if (namedRanges.Any())
+            {
+                return namedRanges.FirstOrDefault().RangeName;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public CellRange GetOrdinal(string name)
+        {
+            var searchRange = NamedRanges.Where(x => x.RangeName == name);
+            if (searchRange.Any()) 
+            {
+                var temp = searchRange.FirstOrDefault();
+                return new CellRange(temp.FromColumn, temp.FromRow, temp.ToColumn.Value, temp.ToRow.Value);
+            }
+            else 
+            {
+                return null;
+            }
+        }
 
         /// <inheritdoc />
         public DataTable GetSchemaTable() => throw new NotSupportedException();

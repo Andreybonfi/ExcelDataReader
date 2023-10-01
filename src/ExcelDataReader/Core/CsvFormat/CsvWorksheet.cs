@@ -47,6 +47,8 @@ namespace ExcelDataReader.Core.CsvFormat
 
         public CellRange[] MergeCells => null;
 
+        public NamedRange[] NamedRanges => null;
+
         public int FieldCount { get; }
 
         public int RowCount

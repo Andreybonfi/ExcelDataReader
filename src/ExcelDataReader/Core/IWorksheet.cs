@@ -21,6 +21,8 @@ namespace ExcelDataReader.Core
 
         CellRange[] MergeCells { get; }
 
+        NamedRange[] NamedRanges { get; }
+
         Column[] ColumnWidths { get; }
 
         IEnumerable<Row> ReadRows();
